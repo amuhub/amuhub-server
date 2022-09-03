@@ -1,6 +1,7 @@
 import express, { Application, Request, Response }from 'express';
 import { validateUser, validateLogin } from '../helpers/validateAuth';
 import User from "../models/User";
+import Profile from '../models/Profile';
 const bcrypt = require('bcrypt');
 const router = express.Router();
 
@@ -60,6 +61,12 @@ router.post("/register", async (req,res) => {
         //save
         await user.save();
 
+        // init profile
+        const initProfile = {
+            user: user._id
+        }
+        const profile : any = new Profile(initProfile)
+        await profile.save();
         //return jwt token
         const token = user.generateAuthToken();
         return res.send(token);
