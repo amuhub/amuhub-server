@@ -1,11 +1,11 @@
-import mongoose from "mongoose";
+const mongoose = require('mongoose');
 
-const quesSchema = new mongoose.Schema({
+const ansSchema = new mongoose.Schema({
     user: {
         type : mongoose.Schema.Types.ObjectId,
         ref: 'user'
     },
-    ques:{
+    text:{
         type: String,
         required: true
     },
@@ -20,14 +20,8 @@ const quesSchema = new mongoose.Schema({
             type : mongoose.Schema.Types.ObjectId,
             ref: 'user'
         }
-    ],
-    answer:[
-        {
-            type : mongoose.Schema.Types.ObjectId,
-            ref: 'answer'
-        }
     ]
 },{timestamps:true})
 
-const Ques = mongoose.model('ques',quesSchema)
-export default Ques;
+const Answer = mongoose.model('answer',ansSchema)
+module.exports = Answer;

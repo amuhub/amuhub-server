@@ -1,6 +1,6 @@
-import joi from 'joi';
+const joi = require("joi");
 
-const validateUser = (user : object) => {
+const validateUser = (user) => {
     const schema = joi.object({
         username : joi.string().min(3).required(),
         email: joi.string().email().required(),
@@ -11,7 +11,7 @@ const validateUser = (user : object) => {
     return result
 }
 
-const validateLogin = (user : object) => {
+const validateLogin = (user) => {
     const schema = joi.object({
         username: joi.string().required(),
         password : joi.string().required()
@@ -21,4 +21,4 @@ const validateLogin = (user : object) => {
     return result
 }
 
-export { validateUser, validateLogin };
+module.exports =  { validateUser, validateLogin };

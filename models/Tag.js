@@ -1,4 +1,4 @@
-import mongoose from 'mongoose';
+const mongoose = require('mongoose');
 
 const tagSchema = new mongoose.Schema({
     user: {
@@ -13,4 +13,4 @@ const tagSchema = new mongoose.Schema({
 })
 
 const Tag = mongoose.model('tag',tagSchema);
-export default Tag;
+module.exports = Tag;

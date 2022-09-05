@@ -1,4 +1,4 @@
-import mongoose from 'mongoose';
+const mongoose = require('mongoose');
 const jwt = require('jsonwebtoken');
 
 const userSchema = new mongoose.Schema(
@@ -38,4 +38,4 @@ userSchema.methods.generateAuthToken = function() {
 
 const User = mongoose.model('user',userSchema);
 
-export default User;
+module.exports = User;

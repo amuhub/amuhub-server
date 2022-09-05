@@ -1,12 +1,12 @@
-import express, { Application, Request, Response }from 'express';
-import { validateUser, validateLogin } from '../helpers/validateAuth';
-import User from "../models/User";
-import Profile from '../models/Profile';
+const express = require('express')
+const { validateUser, validateLogin } = require('../utils/validateAuth');
+const User = require("../models/User");
+const Profile = require("../models/Profile");
 const bcrypt = require('bcrypt');
 const router = express.Router();
 
 //login
-router.post("/login", async (req: Request,res: Response)=>{
+router.post("/login", async (req,res)=>{
     // validate login
     const result = validateLogin(req.body);
     if(result.error){
@@ -14,7 +14,7 @@ router.post("/login", async (req: Request,res: Response)=>{
     }
     // check if user exist
     try{
-        const user : any = await User.findOne({username : req.body.username});
+        const user = await User.findOne({username : req.body.username});
         if(!user) {
             return res.status(401).json({error : "User not registered"});
         }
@@ -26,7 +26,7 @@ router.post("/login", async (req: Request,res: Response)=>{
         // then return token
         const token = user.generateAuthToken()
         return res.send(token);
-    }catch(err : any){
+    }catch(err){
         console.error(err.message);
         return res.status(400).send("Server Error");
     }
@@ -53,7 +53,7 @@ router.post("/register", async (req,res) => {
             email : req.body.email,
             password: req.body.password,
         }
-        const user : any = new User(newUser);
+        const user = new User(newUser);
 
         //bcrypt hashing
         const salt = await bcrypt.genSalt(10);
@@ -65,15 +65,15 @@ router.post("/register", async (req,res) => {
         const initProfile = {
             user: user._id
         }
-        const profile : any = new Profile(initProfile)
+        const profile = new Profile(initProfile)
         await profile.save();
         //return jwt token
         const token = user.generateAuthToken();
         return res.send(token);
-    } catch(err : any){
+    } catch(err){
         console.error(err.message);
         res.status(500).send("Server Error");
     }
 })
 
-export default router;
+module.exports = router;

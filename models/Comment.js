@@ -1,4 +1,4 @@
-import mongoose from 'mongoose';
+const mongoose = require('mongoose');
 
 const commentSchema = new mongoose.Schema({
     user: {
@@ -12,4 +12,4 @@ const commentSchema = new mongoose.Schema({
 },{timestamps:true})
 
 const Comment = mongoose.model('comment',commentSchema);
-export default Comment;
+module.exports = Comment;
