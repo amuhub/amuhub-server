@@ -5,9 +5,9 @@ const profileSchema = new mongoose.Schema({
         type : mongoose.Schema.Types.ObjectId,
         ref: 'user'
     },
-    pic:{ 
-        data: Buffer, 
-        contentType: String 
+    pic:{
+        type: String,
+        default: 'https://res.cloudinary.com/dtt5pe9sl/image/upload/v1662442630/amuhub/default_powath.jpg'
     },
     bio:{
         type: String

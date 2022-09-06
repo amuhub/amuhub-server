@@ -1,9 +1,10 @@
 const express = require("express");
 const dotenv = require("dotenv")
+const Profile = require("../models/Profile")
 const cloudinary = require('cloudinary').v2;
 const { CloudinaryStorage } = require('multer-storage-cloudinary');
 const multer = require('multer');
-// const cloud = require('../utils/cloud');
+const auth = require('../middleware/auth');
 const router = express.Router();
 
 dotenv.config();
@@ -22,9 +23,19 @@ const storage = new CloudinaryStorage({
 
 const upload = multer({storage: storage});
 
-router.post("/photo", upload.single("photo"), async (req,res) => {
-    console.log(req.file.path)
-    res.send("works")
+router.put("/photo", [ auth, upload.single("photo") ], async (req,res) => {
+    try{
+        // update pic
+        const path = req.file.path
+        const profile = await Profile.findOne({user : req.user.id});
+        profile.pic = path;
+        await profile.save();
+        return res.status(201).json(profile);
+    } catch (err){
+        console.error(err.message)
+        res.status(500).send("Server Error")
+    }
+    
 })
 
 module.exports = router;
