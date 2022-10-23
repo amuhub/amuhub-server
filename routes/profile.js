@@ -5,7 +5,10 @@ const cloudinary = require('cloudinary').v2;
 const { CloudinaryStorage } = require('multer-storage-cloudinary');
 const multer = require('multer');
 const auth = require('../middleware/auth');
+const validateProfile = require('../utils/validateProfile');
 const router = express.Router();
+const get_response_dict = require('../utils/response');
+
 
 dotenv.config();
 cloudinary.config({
@@ -30,12 +33,68 @@ router.put("/photo", [ auth, upload.single("photo") ], async (req,res) => {
         const profile = await Profile.findOne({user : req.user.id});
         profile.pic = path;
         await profile.save();
-        return res.status(201).json(profile);
+        const response = get_response_dict(200, "Profile photo updated", profile)
+        return res.status(201).json(response);
+    } catch (err){
+        console.error(err.message)
+        res.status(500).send("Server Error")
+    } 
+})
+
+router.put("/edit", auth, async (req,res) => {
+    try{
+        // update profile
+        const result = validateProfile(req.body);
+        if(result.error){
+            const response = get_response_dict(401, "Validation error", {error: result.error.details[0].message})
+            return res.status(400).json(response);
+        }
+        const profile = await Profile.findOne({user : req.user.id});
+        profile.location = req.body.location;
+        profile.bio = req.body.bio;
+        profile.department = req.body.department;
+        profile.interest = req.body.interest;
+        await profile.save();
+        const response = get_response_dict(200, "Profile updated", profile)
+        return res.status(201).json(response);
     } catch (err){
         console.error(err.message)
         res.status(500).send("Server Error")
     }
-    
+})
+
+
+router.get("/me", auth, async (req,res) => {
+    try{
+        // get profile
+        const profile = await Profile.findOne({user : req.user.id});
+        if(!profile){
+            const response = get_response_dict(401, "Profile not found", null)
+            return res.status(401).json(response);
+        }
+        const response = get_response_dict(200, "Profile found", profile)
+        return res.status(201).json(response);
+    } catch (err){
+        console.error(err.message)
+        res.status(500).send("Server Error")
+    }
+})
+
+
+router.get("/:username", async (req,res) => {
+    try{
+        // get profile
+        const profile = await Profile.findOne({username : req.params.username});
+        if(!profile){
+            const response = get_response_dict(401, "Profile not found", null)
+            return res.status(401).json(response);
+        }
+        const response = get_response_dict(200, "Profile found", profile)
+        return res.status(201).json(response);
+    } catch (err){
+        console.error(err.message)
+        res.status(500).send("Server Error")
+    }
 })
 
 module.exports = router;

@@ -3,6 +3,8 @@ const { validateUser, validateLogin } = require('../utils/validateAuth');
 const User = require("../models/User");
 const Profile = require("../models/Profile");
 const bcrypt = require('bcrypt');
+const get_response_dict = require('../utils/response');
+const { response } = require('express');
 const router = express.Router();
 
 //login
@@ -10,22 +12,26 @@ router.post("/login", async (req,res)=>{
     // validate login
     const result = validateLogin(req.body);
     if(result.error){
-        return res.status(400).json({error: result.error.details[0].message});
+        const response = get_response_dict(401, "Validation error", {error: result.error.details[0].message})
+        return res.status(400).json(response);
     }
     // check if user exist
     try{
         const user = await User.findOne({username : req.body.username});
         if(!user) {
-            return res.status(401).json({error : "User not registered"});
+            const response = get_response_dict(401, "User not registered", null)
+            return res.status(401).json(response);
         }
         // bcrypt compare password
         const isMatch = await bcrypt.compare( req.body.password, user.password)
         if(!isMatch){
-            return res.send(401).json({error:"Invalid credentials"})
+            const response = get_response_dict(401, "Invalid credentials", null)
+            return res.status(401).json(response);
         }
         // then return token
         const token = user.generateAuthToken()
-        return res.send(token);
+        const response = get_response_dict(200, "Login successful", {token:token})
+        return res.send(response);
     }catch(err){
         console.error(err.message);
         return res.status(400).send("Server Error");
@@ -36,7 +42,8 @@ router.post("/login", async (req,res)=>{
 router.post("/register", async (req,res) => {
     const result = validateUser(req.body);
     if(result.error){
-        return res.status(400).json({error: result.error.details[0].message});
+        const response = get_response_dict(401, "Validation error", {error: result.error.details[0].message})
+        return res.status(400).json(response);
     }
     try{
         //check if user already exists
@@ -45,7 +52,8 @@ router.post("/register", async (req,res) => {
             {email: req.body.email}
         ]})
         if(check_user){
-            return res.status(401).json({error: "User already exists"});
+            const response = get_response_dict(401, "User already exists", null)
+            return res.status(401).send(response);
         }
         // create object
         const newUser = {
@@ -69,7 +77,8 @@ router.post("/register", async (req,res) => {
         await profile.save();
         //return jwt token
         const token = user.generateAuthToken();
-        return res.send(token);
+        const response = get_response_dict(200, "User registration successful", {token:token})
+        return res.send(response);
     } catch(err){
         console.error(err.message);
         res.status(500).send("Server Error");
