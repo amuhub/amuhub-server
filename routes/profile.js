@@ -4,11 +4,11 @@ const Profile = require("../models/Profile")
 const cloudinary = require('cloudinary').v2;
 const { CloudinaryStorage } = require('multer-storage-cloudinary');
 const multer = require('multer');
-const auth = require('../middleware/auth');
+const { auth, authAdmin } = require('../middleware/auth')
 const validateProfile = require('../utils/validateProfile');
 const router = express.Router();
 const get_response_dict = require('../utils/response');
-
+const { getAnswerforUser, getQuestionforUser } = require('../utils/profileUtils');
 
 dotenv.config();
 cloudinary.config({
@@ -72,7 +72,21 @@ router.get("/me", auth, async (req,res) => {
             const response = get_response_dict(401, "Profile not found", null)
             return res.status(401).json(response);
         }
-        const response = get_response_dict(200, "Profile found", profile)
+
+        // get answers for user
+        const answers = await getAnswerforUser(req.user.id);
+        const questions = await getQuestionforUser(req.user.id);
+
+        console.log(answers)
+        console.log(questions)
+        
+        // convert profile to json
+        var profileData = profile.toJSON();
+        profileData.answers = answers;
+        profileData.questions = questions;
+
+        console.log(profileData)
+        const response = get_response_dict(200, "Profile found", profileData)
         return res.status(201).json(response);
     } catch (err){
         console.error(err.message)

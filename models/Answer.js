@@ -5,6 +5,10 @@ const ansSchema = new mongoose.Schema({
         type : mongoose.Schema.Types.ObjectId,
         ref: 'user'
     },
+    ques:{
+        type : mongoose.Schema.Types.ObjectId,
+        ref: 'ques'
+    },
     text:{
         type: String,
         required: true

@@ -9,6 +9,10 @@ const quesSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    tag:{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'tag'
+    },
     upvotes:[
         {
             type : mongoose.Schema.Types.ObjectId,
@@ -19,12 +23,6 @@ const quesSchema = new mongoose.Schema({
         {
             type : mongoose.Schema.Types.ObjectId,
             ref: 'user'
-        }
-    ],
-    answer:[
-        {
-            type : mongoose.Schema.Types.ObjectId,
-            ref: 'answer'
         }
     ]
 },{timestamps:true})

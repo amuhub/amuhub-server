@@ -17,6 +17,10 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    isAdmin: {
+      type: Boolean,
+      default: false,
+    },
     following: [{ type: mongoose.Schema.Types.ObjectId, ref: "user" }],
     follower: [{ type: mongoose.Schema.Types.ObjectId, ref: "user" }],
   },
@@ -27,7 +31,8 @@ userSchema.methods.generateAuthToken = function() {
   const payload = {
       user:{
           id: this._id,
-          username: this.username
+          username: this.username,
+          isAdmin: this.isAdmin
       }
   }
 
