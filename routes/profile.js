@@ -9,6 +9,7 @@ const validateProfile = require('../utils/validateProfile');
 const router = express.Router();
 const get_response_dict = require('../utils/response');
 const { getAnswerforUser, getQuestionforUser } = require('../utils/profileUtils');
+const User = require("../models/User");
 
 dotenv.config();
 cloudinary.config({
@@ -66,16 +67,18 @@ router.put("/edit", auth, async (req,res) => {
 
 router.get("/me", auth, async (req,res) => {
     try{
-        // get profile
-        const profile = await Profile.findOne({user : req.user.id});
+        // get user
+        const current_user = await User.findById(req.user.id);
+        const profile = await Profile.findOne({user: searched_user.id});
+
         if(!profile){
             const response = get_response_dict(401, "Profile not found", null)
             return res.status(401).json(response);
         }
 
         // get answers for user
-        const answers = await getAnswerforUser(req.user.id);
-        const questions = await getQuestionforUser(req.user.id);
+        const answers = await getAnswerforUser(current_user.id);
+        const questions = await getQuestionforUser(current_user.id);
 
         console.log(answers)
         console.log(questions)
@@ -85,7 +88,45 @@ router.get("/me", auth, async (req,res) => {
         profileData.answers = answers;
         profileData.questions = questions;
 
-        console.log(profileData)
+        // get searched_user's followers and following
+        profileData.followers = current_user.followers;
+        profileData.following = current_user.following;
+
+        const response = get_response_dict(200, "Profile found", profileData)
+        return res.status(201).json(response);
+    } catch (err){
+        console.error(err.message)
+        res.status(500).send("Server Error")
+    }
+})
+
+router.get("/:username", async (req,res) => {
+    try{
+        // get user
+        const searched_user = await User.findOne({username : req.params.username});
+        const profile = await Profile.findOne({user: searched_user.id});
+
+        if(!profile){
+            const response = get_response_dict(401, "Profile not found", null)
+            return res.status(401).json(response);
+        }
+
+        // get answers for user
+        const answers = await getAnswerforUser(searched_user.id);
+        const questions = await getQuestionforUser(searched_user.id);
+
+        console.log(answers)
+        console.log(questions)
+        
+        // convert profile to json
+        var profileData = profile.toJSON();
+        profileData.answers = answers;
+        profileData.questions = questions;
+
+        // get searched_user's followers and following
+        profileData.followers = searched_user.followers;
+        profileData.following = searched_user.following;
+
         const response = get_response_dict(200, "Profile found", profileData)
         return res.status(201).json(response);
     } catch (err){
@@ -95,20 +136,69 @@ router.get("/me", auth, async (req,res) => {
 })
 
 
-router.get("/:username", async (req,res) => {
+//follow user
+router.put("/follow/:username", auth, async (req,res) => {
     try{
-        // get profile
-        const profile = await Profile.findOne({username : req.params.username});
-        if(!profile){
-            const response = get_response_dict(401, "Profile not found", null)
+        // get user
+        const other_user = await User.findOne({username : req.params.username});
+        if(!other_user){
+            const response = get_response_dict(401, "User not found", null)
             return res.status(401).json(response);
         }
-        const response = get_response_dict(200, "Profile found", profile)
+        // check if already following
+        if(other_user.followers.includes(req.user.id)){
+            const response = get_response_dict(401, "Already following", null)
+            return res.status(401).json(response);
+        }
+
+        // add to user's followers
+        other_user.followers.push(req.user.id);
+        await other_user.save();
+
+        // add to other_user's following
+        const current_user = await User.findById(req.user.id);
+        current_user.following.push(other_user.id);
+        await current_user.save();
+
+        const response = get_response_dict(200, "User followed", current_user)
         return res.status(201).json(response);
-    } catch (err){
+    }catch(err){
         console.error(err.message)
         res.status(500).send("Server Error")
     }
-})
+});
+
+//unfollow user
+router.put("/unfollow/:username", auth, async (req,res) => {
+    try{
+        // get user
+        const other_user = await User.findOne({username : req.params.username});
+        if(!other_user){
+            const response = get_response_dict(401, "User not found", null)
+            return res.status(401).json(response);
+        }
+        // check if already following
+        if(!other_user.followers.includes(req.user.id)){
+            const response = get_response_dict(401, "Not following", null)
+            return res.status(401).json(response);
+        }
+
+        // remove from other_user's followers
+        other_user.followers.pull(req.user.id);
+        await other_user.save();
+
+        // remove from current_user's following
+        const current_user = await User.findById(req.user.id)
+        current_user.following.pull(other_user.id);
+        await current_user.save();
+
+        // showing updated user
+        const response = get_response_dict(200, "User unfollowed", current_user )
+        return res.status(201).json(response);
+    }catch(err){
+        console.error(err.message)
+        res.status(500).send("Server Error")
+    }
+});
 
 module.exports = router;
