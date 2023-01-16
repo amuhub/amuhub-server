@@ -8,7 +8,7 @@ const { auth, authAdmin } = require('../middleware/auth')
 const validateProfile = require('../utils/validateProfile');
 const router = express.Router();
 const get_response_dict = require('../utils/response');
-const { getAnswerforUser, getQuestionforUser } = require('../utils/profileUtils');
+const { getAnswerforUser, getQuestionforUser, getPostforUser } = require('../utils/profileUtils');
 const User = require("../models/User");
 
 dotenv.config();
@@ -79,6 +79,7 @@ router.get("/me", auth, async (req,res) => {
         // get answers for user
         const answers = await getAnswerforUser(current_user.id);
         const questions = await getQuestionforUser(current_user.id);
+        const posts = await getPostforUser(current_user.id);
 
         console.log(answers)
         console.log(questions)
@@ -87,6 +88,7 @@ router.get("/me", auth, async (req,res) => {
         var profileData = profile.toJSON();
         profileData.answers = answers;
         profileData.questions = questions;
+        profileData.posts = posts;
 
         // get searched_user's followers and following
         profileData.followers = current_user.followers;
@@ -114,6 +116,7 @@ router.get("/:username", async (req,res) => {
         // get answers for user
         const answers = await getAnswerforUser(searched_user.id);
         const questions = await getQuestionforUser(searched_user.id);
+        const posts = await getPostforUser(searched_user.id);
 
         console.log(answers)
         console.log(questions)
@@ -122,6 +125,7 @@ router.get("/:username", async (req,res) => {
         var profileData = profile.toJSON();
         profileData.answers = answers;
         profileData.questions = questions;
+        profileData.posts = posts;
 
         // get searched_user's followers and following
         profileData.followers = searched_user.followers;

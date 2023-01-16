@@ -21,4 +21,14 @@ const getQuestionforUser = async (userId) => {
     }
 }
 
-module.exports = { getAnswerforUser, getQuestionforUser };
+const getPostforUser = async (userId) => {
+    try{
+        const posts = await Post.find({user: userId});
+        return posts;
+    } catch(err){
+        console.error(err.message);
+        return null;
+    }
+}
+
+module.exports = { getAnswerforUser, getQuestionforUser, getPostforUser };

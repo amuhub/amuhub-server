@@ -55,7 +55,7 @@ router.post("/upload", [ auth, upload.single("photo") ], async (req,res) => {
 router.get("/feed", auth, async (req,res) => {
     try{
         const current_user = await User.findById(req.user.id);
-        const posts = await Post.find({user: {$in: user.following}})
+        const posts = await Post.find({user: {$in: current_user.following}})
         const response = get_response_dict(200, "Posts fetched", posts)
         return res.status(200).json(response);
     } catch(err){
