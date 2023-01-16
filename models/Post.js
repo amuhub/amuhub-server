@@ -5,9 +5,9 @@ const postSchema = new mongoose.Schema({
         type : mongoose.Schema.Types.ObjectId,
         ref: 'user'
     },
-    photo:{ 
-        data: Buffer, 
-        contentType: String 
+    photo:{
+        type: String,
+        required: true
     },
     caption:{
         type: String

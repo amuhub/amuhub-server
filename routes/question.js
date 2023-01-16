@@ -75,8 +75,49 @@ router.get("/:id", auth , async (req,res) => {
 // get all questions filtered acc to tags
 router.get("/", auth , async (req,res) => {
     try{
-        // const tags = req.query.tags.split(",");
-        const questions = await Question.find().populate("tag");
+        // latest questions
+        if(req.query.tag){
+            const tagID = req.query.tag;
+            const questions = await Question.find({tag : tagID}).populate("tag").sort({createdAt: -1});
+        } else {
+            const questions = await Question.find().populate("tag").sort({createdAt: -1});
+        }
+
+        if(!questions){
+            const response = get_response_dict(401, "Questions not found", null)
+            return res.status(401).json(response);
+        }
+
+        // get profile for user for each question
+        var questionsList = [];
+        for (var i = 0; i < questions.length; i++){
+            const profile = await Profile.findOne({user : questions[i].user});
+            var questionData = questions[i].toJSON();
+            questionData.profile = profile;
+            questionsList.push(questionData);
+        }
+
+        const response = get_response_dict(200, "Questions found", questionsList)
+        return res.status(201).json(response);
+    } catch (err){
+        console.error(err.message);
+        return res.status(500).send("Server Error");
+    }
+});
+
+
+// get questions which have tags in common with user's profile's interests
+router.get("/interests", auth , async (req,res) => {
+    try{
+        // get user profile
+        const profile = await Profile.findOne({user : req.user.id});
+        if(!profile){
+            const response = get_response_dict(401, "Profile not found", null)
+            return res.status(401).json(response);
+        }
+
+        // get all questions with tags in common with user's profile's interests
+        const questions = await Question.find({tag : {$in : profile.interests}}).populate("tag").sort({createdAt: -1});
         if(!questions){
             const response = get_response_dict(401, "Questions not found", null)
             return res.status(401).json(response);

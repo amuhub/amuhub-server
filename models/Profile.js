@@ -12,6 +12,12 @@ const profileSchema = new mongoose.Schema({
     bio:{
         type: String
     },
+    posts: [
+        {
+            type : mongoose.Schema.Types.ObjectId,
+            ref: 'post'
+        }
+    ],
     department:{
         type: String
     },
