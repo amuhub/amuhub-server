@@ -69,29 +69,21 @@ router.get("/me", auth, async (req,res) => {
     try{
         // get user
         const current_user = await User.findById(req.user.id);
-        const profile = await Profile.findOne({user: searched_user.id});
+        const profile = await Profile.findOne({user: current_user.id});
 
         if(!profile){
             const response = get_response_dict(401, "Profile not found", null)
             return res.status(401).json(response);
         }
-
-        // get answers for user
-        const answers = await getAnswerforUser(current_user.id);
-        const questions = await getQuestionforUser(current_user.id);
-        const posts = await getPostforUser(current_user.id);
-
-        console.log(answers)
-        console.log(questions)
         
         // convert profile to json
         var profileData = profile.toJSON();
-        profileData.answers = answers;
-        profileData.questions = questions;
-        profileData.posts = posts;
+        profileData.username = current_user.username;
+        profileData.name = current_user.name;
+
 
         // get searched_user's followers and following
-        profileData.followers = current_user.followers;
+        profileData.follower = current_user.follower;
         profileData.following = current_user.following;
 
         const response = get_response_dict(200, "Profile found", profileData)
@@ -112,23 +104,14 @@ router.get("/:username", async (req,res) => {
             const response = get_response_dict(401, "Profile not found", null)
             return res.status(401).json(response);
         }
-
-        // get answers for user
-        const answers = await getAnswerforUser(searched_user.id);
-        const questions = await getQuestionforUser(searched_user.id);
-        const posts = await getPostforUser(searched_user.id);
-
-        console.log(answers)
-        console.log(questions)
         
         // convert profile to json
         var profileData = profile.toJSON();
-        profileData.answers = answers;
-        profileData.questions = questions;
-        profileData.posts = posts;
+        profileData.username = searched_user.username;
+        profileData.name = searched_user.name;
 
         // get searched_user's followers and following
-        profileData.followers = searched_user.followers;
+        profileData.follower = searched_user.follower;
         profileData.following = searched_user.following;
 
         const response = get_response_dict(200, "Profile found", profileData)
@@ -139,6 +122,70 @@ router.get("/:username", async (req,res) => {
     }
 })
 
+router.get("/:username/answers", async (req,res) => {
+    try{
+        // get user
+        const searched_user = await User.findOne({username : req.params.username});
+        const profile = await Profile.findOne({user: searched_user.id});
+
+        if(!profile){
+            const response = get_response_dict(401, "Profile not found", null)
+            return res.status(401).json(response);
+        }
+        
+        // get answers
+        const answers = await getAnswerforUser(searched_user.id);
+        const response = get_response_dict(200, "Answers found", answers)
+        return res.status(201).json(response);
+    } catch (err){
+        console.error(err.message)
+        res.status(500).send("Server Error")
+    }
+})
+
+router.get("/:username/questions", async (req,res) => {
+    try{
+        // get user
+        const searched_user = await User.findOne({username : req.params.username});
+        const profile = await Profile.findOne({user: searched_user.id});
+
+        if(!profile){
+            const response = get_response_dict(401, "Profile not found", null)
+            return res.status(401).json(response);
+        }
+        
+        // get questions
+        const questions = await getQuestionforUser(searched_user.id);
+        const response = get_response_dict(200, "Questions found", questions)
+        return res.status(201).json(response);
+    }
+    catch (err){
+        console.error(err.message)
+        res.status(500).send("Server Error")
+    }
+})
+
+router.get("/:username/posts", async (req,res) => {
+    try{
+        // get user
+        const searched_user = await User.findOne({username : req.params.username});
+        const profile = await Profile.findOne({user: searched_user.id});
+
+        if(!profile){
+            const response = get_response_dict(401, "Profile not found", null)
+            return res.status(401).json(response);
+        }
+        
+        // get posts
+        const posts = await getPostforUser(searched_user.id);
+        const response = get_response_dict(200, "Posts found", posts)
+        return res.status(201).json(response);
+    }
+    catch (err){
+        console.error(err.message)
+        res.status(500).send("Server Error")
+    }
+})
 
 //follow user
 router.put("/follow/:username", auth, async (req,res) => {
