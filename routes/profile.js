@@ -1,6 +1,7 @@
 const express = require("express");
 const dotenv = require("dotenv")
 const Profile = require("../models/Profile")
+const Question = require("../models/Question")  
 const cloudinary = require('cloudinary').v2;
 const { CloudinaryStorage } = require('multer-storage-cloudinary');
 const multer = require('multer');
@@ -135,7 +136,21 @@ router.get("/:username/answers", async (req,res) => {
         
         // get answers
         const answers = await getAnswerforUser(searched_user.id);
-        const response = get_response_dict(200, "Answers found", answers)
+
+        // get questions for every answer
+        var answerList = [];
+        for (var i = 0; i < answers.length; i++){
+            var answer = answers[i].toJSON();
+            var question = await Question.findById(answer.ques);
+            const askedByProfile = await Profile.findOne({user: question.user});
+            const askedByUser = await User.findById(question.user);
+            answer.question = question;
+            answer.askedByProfile = askedByProfile;
+            answer.askedByUser = askedByUser;
+        
+            answerList.push(answer);
+        }
+        const response = get_response_dict(200, "Answers found", answerList)
         return res.status(201).json(response);
     } catch (err){
         console.error(err.message)

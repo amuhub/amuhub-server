@@ -5,6 +5,7 @@ const routerAuth = require('./routes/auth');
 const routerProf = require('./routes/profile');
 const routerQues = require('./routes/question');
 const routerTag = require('./routes/tags');
+const routerAns = require('./routes/answer');
 const cors = require('cors');
 const fileUpload = require('express-fileupload');
 
@@ -18,6 +19,7 @@ app.use("/auth", routerAuth);
 app.use("/profile",routerProf);
 app.use("/question",routerQues);
 app.use("/tag",routerTag);
+app.use("/answer",routerAns);
 
 app.get('/',(req,res)=> {
     res.status(200).json({data:"api runnings"})
