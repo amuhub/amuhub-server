@@ -28,10 +28,10 @@ const storage = new CloudinaryStorage({
 
 const upload = multer({storage: storage});
 
-router.put("/photo", [ auth, upload.single("photo") ], async (req,res) => {
+router.put("/photo", auth, async (req,res) => {
     try{
         // update pic
-        const path = req.file.path
+        const path = req.body.path;
         const profile = await Profile.findOne({user : req.user.id});
         profile.pic = path;
         await profile.save();
