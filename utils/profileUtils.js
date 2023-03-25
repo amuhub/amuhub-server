@@ -13,7 +13,7 @@ const getAnswerforUser = async (userId) => {
 
 const getQuestionforUser = async (userId) => {
     try{
-        const questions = await Question.find({user: userId});
+        const questions = await Question.find({user: userId}).populate("tag", "name");
         return questions;
     } catch(err){
         console.error(err.message);
