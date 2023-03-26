@@ -52,10 +52,18 @@ router.put("/edit", auth, async (req,res) => {
             return res.status(400).json(response);
         }
         const profile = await Profile.findOne({user : req.user.id});
-        profile.location = req.body.location;
-        profile.bio = req.body.bio;
-        profile.department = req.body.department;
-        profile.interest = req.body.interest;
+        if (req.body.location !== undefined) {
+            profile.location = req.body.location;
+        }
+        if (req.body.bio !== undefined) {
+            profile.bio = req.body.bio;
+        }
+        if (req.body.department !== undefined) {
+            profile.department = req.body.department;
+        }
+        if (req.body.interest !== undefined) {
+            profile.interest = req.body.interest;
+        }
         await profile.save();
         const response = get_response_dict(200, "Profile updated", profile)
         return res.status(201).json(response);
