@@ -116,7 +116,7 @@ router.get("/:username", async (req,res) => {
         profileData.following = searched_user.following;
 
         const response = get_response_dict(200, "Profile found", profileData)
-        return res.status(201).json(response);
+        return res.status(200).json(response);
     } catch (err){
         console.error(err.message)
         res.status(500).send("Server Error")
