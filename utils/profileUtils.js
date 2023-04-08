@@ -1,5 +1,6 @@
 const Answer = require('../models/Answer');
 const Question = require('../models/Question');
+const Post = require('../models/Post');
 
 const getAnswerforUser = async (userId) => {
     try{

@@ -27,13 +27,12 @@ const storage = new CloudinaryStorage({
 
 const upload = multer({storage: storage});
 
-router.post("/upload", [ auth, upload.single("photo") ], async (req,res) => {
+router.post("/upload", auth, async (req,res) => {
     try{
-        const path = req.file.path
         // create post
         const postData = {
             user: req.user.id,
-            photo: path,
+            photo: req.body.photo,
             caption: req.body.caption
         }
         const post = new Post(postData);
