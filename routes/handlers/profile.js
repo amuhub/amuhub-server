@@ -26,4 +26,33 @@ const followUser = async (req, res, session) => {
   };
 
 
-module.exports = { followUser };
+const unfollowUser = async (req, res, session) => {
+    // get user
+    const other_user = await User.findOne({username : req.params.username});
+    if(!other_user){
+        const response = get_response_dict(401, "User not found", null)
+        return res.status(401).json(response);
+    }
+    // check if already following
+    if(!other_user.follower.includes(req.user.id)){
+        const response = get_response_dict(401, "Not following", null)
+        return res.status(401).json(response);
+    }
+
+    // remove from other_user's followers
+    other_user.follower.pull(req.user.id);
+    await other_user.save();
+
+    // remove from current_user's following
+    const current_user = await User.findById(req.user.id)
+    current_user.following.pull(other_user.id);
+    await current_user.save();
+
+    // showing updated user
+    const response = get_response_dict(200, "User unfollowed", current_user )
+    return res.status(201).json(response);
+};
+
+
+
+module.exports = { followUser, unfollowUser };

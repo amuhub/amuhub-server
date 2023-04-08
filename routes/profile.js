@@ -11,7 +11,7 @@ const router = express.Router();
 const get_response_dict = require('../utils/response');
 const { getAnswerforUser, getQuestionforUser, getPostforUser } = require('../utils/profileUtils');
 const { withTransaction } = require('../middleware/db')
-const { followUser } = require('./handlers/profile');
+const { followUser, unfollowUser } = require('./handlers/profile');
 const User = require("../models/User");
 
 dotenv.config();
@@ -216,37 +216,7 @@ router.get("/:username/posts", async (req,res) => {
 router.put('/follow/:username', auth, withTransaction(followUser));
 
 //unfollow user
-router.put("/unfollow/:username", auth, async (req,res) => {
-    try{
-        // get user
-        const other_user = await User.findOne({username : req.params.username});
-        if(!other_user){
-            const response = get_response_dict(401, "User not found", null)
-            return res.status(401).json(response);
-        }
-        // check if already following
-        if(!other_user.followers.includes(req.user.id)){
-            const response = get_response_dict(401, "Not following", null)
-            return res.status(401).json(response);
-        }
-
-        // remove from other_user's followers
-        other_user.followers.pull(req.user.id);
-        await other_user.save();
-
-        // remove from current_user's following
-        const current_user = await User.findById(req.user.id)
-        current_user.following.pull(other_user.id);
-        await current_user.save();
-
-        // showing updated user
-        const response = get_response_dict(200, "User unfollowed", current_user )
-        return res.status(201).json(response);
-    }catch(err){
-        console.error(err.message)
-        res.status(500).send("Server Error")
-    }
-});
+router.put("/unfollow/:username", auth, withTransaction(unfollowUser));
 
 // search username and name
 router.get("/", async (req,res) => {
