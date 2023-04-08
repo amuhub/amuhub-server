@@ -5,13 +5,13 @@ const Question = require("../models/Question")
 const cloudinary = require('cloudinary').v2;
 const { CloudinaryStorage } = require('multer-storage-cloudinary');
 const multer = require('multer');
-const { auth, authAdmin } = require('../middleware/auth')
+const { auth, authAdmin, authOptional } = require('../middleware/auth')
 const validateProfile = require('../utils/validateProfile');
 const router = express.Router();
 const get_response_dict = require('../utils/response');
 const { getAnswerforUser, getQuestionforUser, getPostforUser } = require('../utils/profileUtils');
 const { withTransaction } = require('../middleware/db')
-const { followUser, unfollowUser } = require('./handlers/profile');
+const { toggleFollowUser } = require('./handlers/profile');
 const User = require("../models/User");
 
 dotenv.config();
@@ -105,7 +105,7 @@ router.get("/me", auth, async (req,res) => {
     }
 })
 
-router.get("/:username", async (req,res) => {
+router.get("/:username", authOptional, async (req,res) => {
     try{
         // get user
         const searched_user = await User.findOne({username : req.params.username});
@@ -124,6 +124,10 @@ router.get("/:username", async (req,res) => {
         // get searched_user's followers and following
         profileData.follower = searched_user.follower;
         profileData.following = searched_user.following;
+        if (req.user) {
+            profileData.auth = true;
+            profileData.isFollowing = searched_user.follower.includes(req.user.id) ? true : false;
+        }
 
         const response = get_response_dict(200, "Profile found", profileData)
         return res.status(200).json(response);
@@ -212,11 +216,8 @@ router.get("/:username/posts", async (req,res) => {
     }
 })
 
-//follow user
-router.put('/follow/:username', auth, withTransaction(followUser));
-
-//unfollow user
-router.put("/unfollow/:username", auth, withTransaction(unfollowUser));
+//toggle follow user
+router.get('/follow/:username', auth, withTransaction(toggleFollowUser));
 
 // search username and name
 router.get("/", async (req,res) => {
