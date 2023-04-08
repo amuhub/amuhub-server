@@ -10,6 +10,8 @@ const validateProfile = require('../utils/validateProfile');
 const router = express.Router();
 const get_response_dict = require('../utils/response');
 const { getAnswerforUser, getQuestionforUser, getPostforUser } = require('../utils/profileUtils');
+const { withTransaction } = require('../middleware/db')
+const { followUser } = require('./handlers/profile');
 const User = require("../models/User");
 
 dotenv.config();
@@ -211,36 +213,7 @@ router.get("/:username/posts", async (req,res) => {
 })
 
 //follow user
-router.put("/follow/:username", auth, async (req,res) => {
-    try{
-        // get user
-        const other_user = await User.findOne({username : req.params.username});
-        if(!other_user){
-            const response = get_response_dict(401, "User not found", null)
-            return res.status(401).json(response);
-        }
-        // check if already following
-        if(other_user.followers.includes(req.user.id)){
-            const response = get_response_dict(401, "Already following", null)
-            return res.status(401).json(response);
-        }
-
-        // add to user's followers
-        other_user.followers.push(req.user.id);
-        await other_user.save();
-
-        // add to other_user's following
-        const current_user = await User.findById(req.user.id);
-        current_user.following.push(other_user.id);
-        await current_user.save();
-
-        const response = get_response_dict(200, "User followed", current_user)
-        return res.status(201).json(response);
-    }catch(err){
-        console.error(err.message)
-        res.status(500).send("Server Error")
-    }
-});
+router.put('/follow/:username', auth, withTransaction(followUser));
 
 //unfollow user
 router.put("/unfollow/:username", auth, async (req,res) => {

@@ -10,6 +10,7 @@ const get_response_dict = require('../utils/response');
 const Profile = require("../models/Profile");
 const User = require("../models/User");
 const Comment = require("../models/Comment");
+const { populate } = require("../models/Profile");
 
 dotenv.config();
 cloudinary.config({
@@ -182,21 +183,40 @@ router.delete("/comment/:post_id/:comment_id", auth, async (req,res) => {
 
 
 // view a post
-router.get("/:id", auth, async (req,res) => {
+router.get("/post/:id", auth, async (req,res) => {
     try{
-        const post = await Post.findById(req.params.id);
+        var post = await Post.findById(req.params.id)
+        .populate("user", ["username"])
+        .populate({
+            path: "comments",
+            select: "text createdAt",
+            populate: {
+                path: "user",
+                select: "username"
+            }
+        });
         if(!post){
             const response = get_response_dict(404, "Post not found", {})
             return res.status(404).json(response);
         }
 
-        if(post.likes.includes(req.user.id)){
-            post.isLiked = true;
-        } else {
-            post.isLiked = false;
+        var postData = post.toJSON();
+        // include user profile data
+        const profile = await Profile.findOne({user: post.user}).select("pic");
+        postData.user.profile = profile;
+
+        for (var i = 0; i < postData.comments.length; i++){
+            const profile = await Profile.findOne({user: postData.comments[i].user}).select("pic");
+            postData.comments[i].user.profile = profile;
         }
 
-        const response = get_response_dict(200, "Post fetched", post)
+        if(post.likes.includes(req.user.id)){
+            postData.isLiked = true;
+        } else {
+            postData.isLiked = false;
+        }
+
+        const response = get_response_dict(200, "Post fetched", postData)
         return res.status(200).json(response);
     } catch(err){
         console.error(err.message)
