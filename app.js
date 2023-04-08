@@ -6,6 +6,7 @@ const routerProf = require('./routes/profile');
 const routerQues = require('./routes/question');
 const routerTag = require('./routes/tags');
 const routerAns = require('./routes/answer');
+const routerFeed = require('./routes/feed');
 const cors = require('cors');
 const fileUpload = require('express-fileupload');
 
@@ -20,6 +21,7 @@ app.use("/profile",routerProf);
 app.use("/question",routerQues);
 app.use("/tag",routerTag);
 app.use("/answer",routerAns);
+app.use("/feed", routerFeed);
 
 app.get('/',(req,res)=> {
     res.status(200).json({data:"api runnings"})
