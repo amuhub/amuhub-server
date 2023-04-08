@@ -57,7 +57,13 @@ router.get("/feed", auth, async (req,res) => {
     try{
         const current_user = await User.findById(req.user.id);
         const posts = await Post.find({user: {$in: current_user.following}}).populate("user");
-        const response = get_response_dict(200, "Posts fetched", posts)
+        
+        var postData = posts.toJSON();
+        for (var i = 0; i < postData.length; i++) {
+            const profile = await Profile.findOne({user: postData[i].user});
+            postData[i].user.profile = profile;
+        }
+        const response = get_response_dict(200, "Posts fetched", postData)
         return res.status(200).json(response);
     } catch(err){
         console.error(err.message)
