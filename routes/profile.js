@@ -278,11 +278,8 @@ router.put("/unfollow/:username", auth, async (req,res) => {
 // search username and name
 router.get("/", async (req,res) => {
     try{
-        // query param
         const search = req.query.search;
-        // search only first letter
         var users = await User.find({$or: [{username: {$regex: "^" + search, $options: "i"}}, {name: {$regex: "^" + search, $options: "i"}}]}).select("id username name");
-        //select only top 3
         users = users.slice(0,5);
         const response = get_response_dict(200, "Users found", users)
         return res.status(201).json(response);
