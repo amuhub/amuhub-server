@@ -8,6 +8,7 @@ const { auth, authAdmin } = require('../middleware/auth')
 const router = express.Router();
 const get_response_dict = require('../utils/response');
 const Profile = require("../models/Profile");
+const User = require("../models/User");
 const Comment = require("../models/Comment");
 
 dotenv.config();
