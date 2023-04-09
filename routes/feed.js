@@ -56,14 +56,16 @@ router.post("/upload", auth, async (req,res) => {
 router.get("/feed", auth, async (req,res) => {
     try{
         const current_user = await User.findById(req.user.id);
-        const posts = await Post.find({user: {$in: current_user.following}}).populate("user");
+        var posts = await Post.find({user: {$in: current_user.following}}).populate("user", "username");
         
-        var postData = posts.toJSON();
-        for (var i = 0; i < postData.length; i++) {
-            const profile = await Profile.findOne({user: postData[i].user});
-            postData[i].user.profile = profile;
+        var postsData = []
+        for (var i = 0; i < posts.length; i++) {
+            var postData = posts[i].toJSON();
+            const profile = await Profile.findOne({user: postData.user._id}).select("pic");
+            postData.user.profile = profile;
+            postsData.push(postData);
         }
-        const response = get_response_dict(200, "Posts fetched", postData)
+        const response = get_response_dict(200, "Posts fetched", postsData)
         return res.status(200).json(response);
     } catch(err){
         console.error(err.message)
