@@ -61,6 +61,11 @@ router.get("/feed", auth, async (req,res) => {
         var postsData = []
         for (var i = 0; i < posts.length; i++) {
             var postData = posts[i].toJSON();
+            if(posts[i].likes.includes(req.user.id)){
+                postData.isLiked = true;
+            } else {
+                postData.isLiked = false;
+            }
             const profile = await Profile.findOne({user: postData.user._id}).select("pic");
             postData.user.profile = profile;
             postsData.push(postData);
