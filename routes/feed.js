@@ -101,7 +101,7 @@ router.delete("/delete/:id", auth, async (req,res) => {
 
 
 // like post
-router.put("/togglelike/:id", auth, async (req,res) => {
+router.post("/togglelike/:id", auth, async (req,res) => {
     try{
         // HEY COPILOT I DONT WANT ANY SUGGESTIONS
         const post = await Post.findById(req.params.id);
