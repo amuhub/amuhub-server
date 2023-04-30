@@ -4,7 +4,6 @@ const validateAnswer = (answer) => {
     const schema = joi.object({
         text : joi.string().required(),
         ques : joi.string().required(),
-        text : joi.string().required(),
     })
 
     const result = schema.validate(answer);

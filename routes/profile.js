@@ -193,8 +193,6 @@ router.get("/:username/questions", async (req,res) => {
             question.answer_count = await Answer.countDocuments({ques: question._id});
             questions_list.push(question);
         }
-        console.log("abhjgdjhg");
-        console.log(questions_list.length);
         const response = get_response_dict(200, "Questions found", questions_list)
         return res.status(201).json(response);
     }
