@@ -233,4 +233,40 @@ router.get("/", async (req,res) => {
     }
 });
 
+// get all followers or following
+router.get("/:username/social/", async (req,res) => {
+    try{
+        // get user
+        const user = await User.findOne({username : req.params.username}).populate("follower", "username name").populate("following", "username name");
+        const social = req.query.social;
+        if(!user){
+            const response = get_response_dict(401, "User not found", null)
+            return res.status(401).json(response);
+        }
+        if (social === 'follower') {
+            var follower_list = [];
+            for (var i=0; i<user.follower.length; i++) {
+                var follower = user.follower[i].toJSON();
+                follower.profile = await Profile.findOne({user: follower._id}).select("pic");
+                follower_list.push(follower);
+            }
+        } else if (social === 'following') {
+            var following_list = [];
+            for (var i=0; i<user.following.length; i++) {
+                var following = user.following[i].toJSON();
+                following.profile = await Profile.findOne({user: following._id}).select("pic");
+                following_list.push(following);
+            }
+        } else {
+            const response = get_response_dict(401, "Invalid query", null)
+            return res.status(401).json(response);
+        }
+        const response = get_response_dict(200, "Users found", social === 'follower' ? follower_list : following_list)
+        return res.status(201).json(response);
+    }catch(err){
+        console.error(err.message)
+        res.status(500).send("Server Error")
+    }
+});
+
 module.exports = router;
