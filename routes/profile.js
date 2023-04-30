@@ -13,6 +13,7 @@ const { getAnswerforUser, getQuestionforUser, getPostforUser } = require('../uti
 const { withTransaction } = require('../middleware/db')
 const { toggleFollowUser } = require('./handlers/profile');
 const User = require("../models/User");
+const Answer = require("../models/Answer");
 
 dotenv.config();
 cloudinary.config({
@@ -184,8 +185,17 @@ router.get("/:username/questions", async (req,res) => {
         }
         
         // get questions
+        var questions_list = [];
         const questions = await getQuestionforUser(searched_user.id);
-        const response = get_response_dict(200, "Questions found", questions)
+        console.log(questions.length);
+        for (var i = 0; i < questions.length; i++){
+            var question = questions[i].toJSON();
+            question.answer_count = await Answer.countDocuments({ques: question._id});
+            questions_list.push(question);
+        }
+        console.log("abhjgdjhg");
+        console.log(questions_list.length);
+        const response = get_response_dict(200, "Questions found", questions_list)
         return res.status(201).json(response);
     }
     catch (err){
@@ -236,14 +246,17 @@ router.get("/", async (req,res) => {
 // get all followers or following
 router.get("/:username/social/", auth, async (req,res) => {
     try{
+        console.log("here")
+        
         // get user
         const user = await User.findOne({username : req.params.username}).populate("follower", "username name").populate("following", "username name");
         const social = req.query.social;
+        console.log(social)
         if(!user){
             const response = get_response_dict(401, "User not found", null)
             return res.status(401).json(response);
         }
-        if (social === 'follower') {
+        if (social === 'followers') {
             var follower_list = [];
             for (var i=0; i<user.follower.length; i++) {
                 var follower = user.follower[i].toJSON();
@@ -261,7 +274,7 @@ router.get("/:username/social/", auth, async (req,res) => {
             const response = get_response_dict(401, "Invalid query", null)
             return res.status(401).json(response);
         }
-        const response = get_response_dict(200, "Users found", social === 'follower' ? follower_list : following_list)
+        const response = get_response_dict(200, "Users found", social === 'followers' ? follower_list : following_list)
         return res.status(201).json(response);
     }catch(err){
         console.error(err.message)

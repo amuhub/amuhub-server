@@ -54,14 +54,20 @@ router.get("/:id", auth , async (req,res) => {
             return res.status(401).json(response);
         }
         // get all answers for this question
-        const answers = await Answer.find({ques : req.params.id});
+        var answer_list = [];
+        const answers = await Answer.find({ques : req.params.id}).populate("user", "username name");
+        for (var i = 0; i < answers.length; i++){
+            var answer = answers[i].toJSON();
+            answer.user.profile = await Profile.findOne({user : answer.user._id}).select("pic");
+            answer_list.push(answer);
+        }
 
         // get profile for user
-        const profile = await Profile.findOne({user : question.user}); 
+        const profile = await Profile.findOne({user : question.user}).select("pic"); 
         
         // convert question to json
         var questionData = question.toJSON();
-        questionData.answers = answers;
+        questionData.answers = answer_list;
         questionData.profile = profile;
 
         const response = get_response_dict(200, "Question found", questionData);
