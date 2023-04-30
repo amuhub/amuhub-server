@@ -234,7 +234,7 @@ router.get("/", async (req,res) => {
 });
 
 // get all followers or following
-router.get("/:username/social/", async (req,res) => {
+router.get("/:username/social/", auth, async (req,res) => {
     try{
         // get user
         const user = await User.findOne({username : req.params.username}).populate("follower", "username name").populate("following", "username name");
