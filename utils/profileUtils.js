@@ -14,7 +14,7 @@ const getAnswerforUser = async (userId) => {
 
 const getQuestionforUser = async (userId) => {
     try{
-        const questions = await Question.find({user: userId}).populate("tag", "name");
+        const questions = await Question.find({user: userId}).populate("tag", "name").sort({createdAt: -1});
         return questions;
     } catch(err){
         console.error(err.message);
@@ -24,7 +24,7 @@ const getQuestionforUser = async (userId) => {
 
 const getPostforUser = async (userId) => {
     try{
-        const posts = await Post.find({user: userId});
+        const posts = await Post.find({user: userId}).sort({createdAt: -1});
         return posts;
     } catch(err){
         console.error(err.message);
