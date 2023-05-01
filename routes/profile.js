@@ -187,7 +187,6 @@ router.get("/:username/questions", async (req,res) => {
         // get questions
         var questions_list = [];
         const questions = await getQuestionforUser(searched_user.id);
-        console.log(questions.length);
         for (var i = 0; i < questions.length; i++){
             var question = questions[i].toJSON();
             question.answer_count = await Answer.countDocuments({ques: question._id});
@@ -233,7 +232,14 @@ router.get("/", async (req,res) => {
         const search = req.query.search;
         var users = await User.find({$or: [{username: {$regex: "^" + search, $options: "i"}}, {name: {$regex: "^" + search, $options: "i"}}]}).select("id username name");
         users = users.slice(0,5);
-        const response = get_response_dict(200, "Users found", users)
+        var users_list = [];
+        for( var i = 0; i < users.length; i++){
+            var userData = users[i].toJSON();
+            const profile = await Profile.findOne({user: userData._id}).select("pic");
+            userData.profile = profile;
+            users_list.push(userData);
+        }
+        const response = get_response_dict(200, "Users found", users_list);
         return res.status(201).json(response);
     }catch(err){
         console.error(err.message)
@@ -243,13 +249,10 @@ router.get("/", async (req,res) => {
 
 // get all followers or following
 router.get("/:username/social/", auth, async (req,res) => {
-    try{
-        console.log("here")
-        
+    try{  
         // get user
         const user = await User.findOne({username : req.params.username}).populate("follower", "username name").populate("following", "username name");
         const social = req.query.social;
-        console.log(social)
         if(!user){
             const response = get_response_dict(401, "User not found", null)
             return res.status(401).json(response);

@@ -113,7 +113,7 @@ router.get("/", auth , async (req,res) => {
 
 
 // get questions which have tags in common with user's profile's interests
-router.get("/interests", auth , async (req,res) => {
+router.get("/interests/tags/", auth , async (req,res) => {
     try{
         // get user profile
         const profile = await Profile.findOne({user : req.user.id});
@@ -121,9 +121,8 @@ router.get("/interests", auth , async (req,res) => {
             const response = get_response_dict(401, "Profile not found", null)
             return res.status(401).json(response);
         }
-
         // get all questions with tags in common with user's profile's interests
-        const questions = await Question.find({tag : {$in : profile.interests}}).populate("tag").sort({createdAt: -1});
+        const questions = await Question.find({tag : {$in : profile.interest}}).populate("user", "username name").populate("tag").sort({createdAt: -1});
         if(!questions){
             const response = get_response_dict(401, "Questions not found", null)
             return res.status(401).json(response);
@@ -132,9 +131,10 @@ router.get("/interests", auth , async (req,res) => {
         // get profile for user for each question
         var questionsList = [];
         for (var i = 0; i < questions.length; i++){
-            const profile = await Profile.findOne({user : questions[i].user});
+            const profile = await Profile.findOne({user : questions[i].user._id}).select("pic");
             var questionData = questions[i].toJSON();
-            questionData.profile = profile;
+            questionData.user.profile = profile;
+            questionData.answer_count = await Answer.countDocuments({ques: questionData._id});
             questionsList.push(questionData);
         }
 
