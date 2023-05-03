@@ -8,7 +8,7 @@ const userSchema = new mongoose.Schema(
       required: true,
       unique: true,
     },
-    name : {
+    name: {
       type: String,
       required: true,
     },
@@ -25,26 +25,27 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
-    following: [{ type: mongoose.Schema.Types.ObjectId, ref: "user" }],
-    follower: [{ type: mongoose.Schema.Types.ObjectId, ref: "user" }],
+    following: [{ type: mongoose.Schema.Types.ObjectId, ref: 'user' }],
+    follower: [{ type: mongoose.Schema.Types.ObjectId, ref: 'user' }],
   },
   { timestamps: true }
 );
 
-userSchema.methods.generateAuthToken = function() {
+userSchema.methods.generateAuthToken = function () {
   const payload = {
-      user:{
-          id: this._id,
-          username: this.username,
-          isAdmin: this.isAdmin
-      }
-  }
+    user: {
+      id: this._id,
+      username: this.username,
+      isAdmin: this.isAdmin,
+    },
+  };
 
-  const token = jwt.sign(payload, process.env.SECRET_KEY,{expiresIn: 360000});
-  return token
-}
+  const token = jwt.sign(payload, process.env.SECRET_KEY, {
+    expiresIn: 360000,
+  });
+  return token;
+};
 
-
-const User = mongoose.model('user',userSchema);
+const User = mongoose.model('user', userSchema);
 
 module.exports = User;

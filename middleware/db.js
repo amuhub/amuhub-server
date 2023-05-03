@@ -22,4 +22,3 @@ const withTransaction = (handler) => async (req, res) => {
 };
 
 module.exports = { withTransaction };
-
