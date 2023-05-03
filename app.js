@@ -31,7 +31,7 @@ app.get('/', (req, res) => {
   res.status(200).json({ data: 'api runnings' });
 });
 
-cron.schedule('* * * * *', () => {
+cron.schedule('0 * * * *', () => {
   // Call the Express API endpoint to run the task every hour '0 * * * *'
   // for every munite '* * * * *'
   deleteAllOldNotifications();
