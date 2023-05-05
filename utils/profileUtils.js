@@ -1,6 +1,7 @@
 const Answer = require('../models/Answer');
 const Question = require('../models/Question');
 const Post = require('../models/Post');
+const Comment = require('../models/Comment');
 
 const getAnswerforUser = async (userId) => {
   try {
@@ -27,7 +28,14 @@ const getQuestionforUser = async (userId) => {
 const getPostforUser = async (userId) => {
   try {
     const posts = await Post.find({ user: userId }).sort({ createdAt: -1 });
-    return posts;
+    var posts_list = [];
+    for (var i = 0; i < posts.length; i++) {
+      var postData = posts[i].toJSON();
+      const comments = await Comment.find({ post: posts[i]._id }).select('_id');
+      postData.comments = comments;
+      posts_list.push(postData);
+    }
+    return posts_list;
   } catch (err) {
     console.error(err.message);
     return null;

@@ -157,15 +157,13 @@ router.post('/comment/:id', auth, async (req, res) => {
       return res.status(404).json(response);
     }
     const newComment = {
+      post: req.params.id,
       user: req.user.id,
       text: req.body.text,
     };
 
     const comment = new Comment(newComment);
     await comment.save();
-
-    post.comments.push(comment._id);
-    await post.save();
 
     // create notification
     if (post.user.toString() !== req.user.id) {
@@ -177,7 +175,7 @@ router.post('/comment/:id', auth, async (req, res) => {
         item_id: post._id,
       });
     }
-    const response = get_response_dict(200, 'Comment added', post);
+    const response = get_response_dict(200, 'Comment added', comment);
     return res.status(200).json(response);
   } catch (err) {
     console.error(err.message);
@@ -186,18 +184,9 @@ router.post('/comment/:id', auth, async (req, res) => {
 });
 
 // delete a comment
-router.delete('/comment/:post_id/:comment_id', auth, async (req, res) => {
+router.delete('/comment/:comment_id', auth, async (req, res) => {
   try {
-    const post = await Post.findById(req.params.post_id);
-    if (!post) {
-      const response = get_response_dict(404, 'Post not found', {});
-      return res.status(404).json(response);
-    }
-
-    // pull out comment
-    const comment = post.comments.find(
-      (comment) => comment.id === req.params.comment_id
-    );
+    const comment = await Comment.findById(req.params.comment_id);
     if (!comment) {
       const response = get_response_dict(404, 'Comment not found', {});
       return res.status(404).json(response);
@@ -209,9 +198,8 @@ router.delete('/comment/:post_id/:comment_id', auth, async (req, res) => {
       return res.status(401).json(response);
     }
 
-    // remove comment
-    post.comments.pull(comment._id);
-    await post.save();
+    // delete comment
+    await comment.remove();
 
     const response = get_response_dict(200, 'Comment deleted', post);
     return res.status(200).json(response);
@@ -224,16 +212,7 @@ router.delete('/comment/:post_id/:comment_id', auth, async (req, res) => {
 // view a post
 router.get('/post/:id', auth, async (req, res) => {
   try {
-    var post = await Post.findById(req.params.id)
-      .populate('user', ['username'])
-      .populate({
-        path: 'comments',
-        select: 'text createdAt',
-        populate: {
-          path: 'user',
-          select: 'username',
-        },
-      });
+    var post = await Post.findById(req.params.id).populate('user', ['username']);
     if (!post) {
       const response = get_response_dict(404, 'Post not found', {});
       return res.status(404).json(response);
@@ -242,15 +221,21 @@ router.get('/post/:id', auth, async (req, res) => {
     var postData = post.toJSON();
     // include user profile data
     const profile = await Profile.findOne({ user: post.user }).select('pic');
-    postData.user.profile = profile;
 
-    for (var i = 0; i < postData.comments.length; i++) {
-      const profile = await Profile.findOne({
-        user: postData.comments[i].user,
+    var comments_list = [];
+    const comments = await Comment.find({ post: post._id }).populate('user', ['username']);
+    for (var i = 0; i < comments.length; i++) {
+      var commentsData = comments[i].toJSON();
+      const commentor_profile = await Profile.findOne({
+        user: comments[i].user._id,
       }).select('pic');
-      postData.comments[i].user.profile = profile;
+      commentsData.user.profile = commentor_profile;
+      comments_list.push(commentsData);
     }
+    postData.user.profile = profile;
+    postData.comments = comments_list;
 
+    // check if post has already been liked
     if (post.likes.includes(req.user.id)) {
       postData.isLiked = true;
     } else {
