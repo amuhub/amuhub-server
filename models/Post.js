@@ -24,7 +24,7 @@ const postSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-postSchema.pre('remove', async function(next) {
+postSchema.pre('remove', async function (next) {
   try {
     await Comment.deleteMany({ post: this._id });
     next();

@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const Answer = require('./Answer');
 
 const quesSchema = new mongoose.Schema(
   {
@@ -29,6 +30,15 @@ const quesSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
+quesSchema.pre('remove', async function (next) {
+  try {
+    await Answer.deleteMany({ ques: this._id });
+    next();
+  } catch (err) {
+    next(err);
+  }
+});
 
 const Ques = mongoose.model('ques', quesSchema);
 module.exports = Ques;

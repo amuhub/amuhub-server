@@ -212,7 +212,9 @@ router.delete('/comment/:comment_id', auth, async (req, res) => {
 // view a post
 router.get('/post/:id', auth, async (req, res) => {
   try {
-    var post = await Post.findById(req.params.id).populate('user', ['username']);
+    var post = await Post.findById(req.params.id).populate('user', [
+      'username',
+    ]);
     if (!post) {
       const response = get_response_dict(404, 'Post not found', {});
       return res.status(404).json(response);
@@ -223,7 +225,9 @@ router.get('/post/:id', auth, async (req, res) => {
     const profile = await Profile.findOne({ user: post.user }).select('pic');
 
     var comments_list = [];
-    const comments = await Comment.find({ post: post._id }).populate('user', ['username']);
+    const comments = await Comment.find({ post: post._id }).populate('user', [
+      'username',
+    ]);
     for (var i = 0; i < comments.length; i++) {
       var commentsData = comments[i].toJSON();
       const commentor_profile = await Profile.findOne({
