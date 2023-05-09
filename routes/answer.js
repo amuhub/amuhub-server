@@ -6,6 +6,8 @@ const router = express.Router();
 const get_response_dict = require('../utils/response');
 const validateAnswer = require('../utils/validateAnswer');
 const { createNotification } = require('../services/notification');
+const { withTransaction } = require('../middleware/db');
+const { upvoteAnswer, downvoteAnswer } = require('./handlers/answer');
 const {
   NotificationTypeActionMapping,
   NotificationTypes,
@@ -53,63 +55,10 @@ router.post('/', auth, async (req, res) => {
 });
 
 // upvote answer
-router.put('/upvote/:id', auth, async (req, res) => {
-  try {
-    const answer = await Answer.findById(req.params.id);
-    if (!answer) {
-      const response = get_response_dict(401, 'Answer not found', null);
-      return res.status(401).json(response);
-    }
-
-    // check if user has already upvoted
-    if (answer.upvotes.includes(req.user.id)) {
-      const response = get_response_dict(401, 'Already upvoted', null);
-      return res.status(401).json(response);
-    }
-
-    // if previously downvoted, remove downvote
-    if (answer.downvotes.includes(req.user.id)) {
-      answer.downvotes.pull(req.user.id);
-    }
-
-    answers.upvotes.push(req.user.id);
-    await answer.save();
-    const response = get_response_dict(201, 'Answer upvoted', answer);
-    return res.status(201).json(response);
-  } catch (err) {
-    console.error(err.message);
-    return res.status(500).send('Server Error');
-  }
-});
+router.post('/upvote/:id', auth, withTransaction(upvoteAnswer));
 
 // downvote answer
-router.put('/downvote/:id', auth, async (req, res) => {
-  try {
-    const answer = await Answer.findById(req.params.id);
-    if (!answer) {
-      const response = get_response_dict(401, 'Answer not found', null);
-      return res.status(401).json(response);
-    }
-
-    // if already downvoted
-    if (answer.downvotes.includes(req.user.id)) {
-      const response = get_response_dict(401, 'Already downvoted', null);
-      return res.status(401).json(response);
-    }
-
-    // if previously upvoted, remove upvote
-    if (answer.upvotes.includes(req.user.id)) {
-      answer.upvotes.pull(req.user.id);
-    }
-
-    await answer.save();
-    const response = get_response_dict(201, 'Answer downvoted', answer);
-    return res.status(201).json(response);
-  } catch (err) {
-    console.error(err.message);
-    return res.status(500).send('Server Error');
-  }
-});
+router.post('/downvote/:id', auth, withTransaction(downvoteAnswer));
 
 // edit answer
 router.put('/edit/:id', auth, async (req, res) => {
