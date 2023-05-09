@@ -94,7 +94,7 @@ router.get('/me', auth, async (req, res) => {
     }
 
     // convert profile to json
-    var profileData = profile.toJSON();
+    let profileData = profile.toJSON();
     profileData.username = current_user.username;
     profileData.name = current_user.name;
 
@@ -125,7 +125,7 @@ router.get('/:username', authOptional, async (req, res) => {
     }
 
     // convert profile to json
-    var profileData = profile.toJSON();
+    let profileData = profile.toJSON();
     profileData.username = searched_user.username;
     profileData.name = searched_user.name;
 
@@ -162,10 +162,10 @@ router.get('/:username/answers', async (req, res) => {
     const answers = await getAnswerforUser(searched_user.id);
 
     // get questions for every answer
-    var answerList = [];
-    for (var i = 0; i < answers.length; i++) {
-      var answer = answers[i].toJSON();
-      var question = await Question.findById(answer.ques);
+    let answerList = [];
+    for (let i = 0; i < answers.length; i++) {
+      let answer = answers[i].toJSON();
+      let question = await Question.findById(answer.ques);
       const askedByProfile = await Profile.findOne({ user: question.user });
       const askedByUser = await User.findById(question.user);
       answer.question = question;
@@ -194,10 +194,10 @@ router.get('/:username/questions', async (req, res) => {
     }
 
     // get questions
-    var questions_list = [];
+    let questions_list = [];
     const questions = await getQuestionforUser(searched_user.id);
-    for (var i = 0; i < questions.length; i++) {
-      var question = questions[i].toJSON();
+    for (let i = 0; i < questions.length; i++) {
+      let question = questions[i].toJSON();
       question.answer_count = await Answer.countDocuments({
         ques: question._id,
       });
@@ -239,16 +239,16 @@ router.get('/follow/:username', auth, withTransaction(toggleFollowUser));
 router.get('/', async (req, res) => {
   try {
     const search = req.query.search;
-    var users = await User.find({
+    let users = await User.find({
       $or: [
         { username: { $regex: '^' + search, $options: 'i' } },
         { name: { $regex: '^' + search, $options: 'i' } },
       ],
     }).select('id username name');
     users = users.slice(0, 5);
-    var users_list = [];
-    for (var i = 0; i < users.length; i++) {
-      var userData = users[i].toJSON();
+    let users_list = [];
+    for (let i = 0; i < users.length; i++) {
+      let userData = users[i].toJSON();
       const profile = await Profile.findOne({ user: userData._id }).select(
         'pic'
       );
@@ -276,18 +276,18 @@ router.get('/:username/social/', auth, async (req, res) => {
       return res.status(401).json(response);
     }
     if (social === 'followers') {
-      var follower_list = [];
-      for (var i = 0; i < user.follower.length; i++) {
-        var follower = user.follower[i].toJSON();
+      let follower_list = [];
+      for (let i = 0; i < user.follower.length; i++) {
+        let follower = user.follower[i].toJSON();
         follower.profile = await Profile.findOne({ user: follower._id }).select(
           'pic'
         );
         follower_list.push(follower);
       }
     } else if (social === 'following') {
-      var following_list = [];
-      for (var i = 0; i < user.following.length; i++) {
-        var following = user.following[i].toJSON();
+      let following_list = [];
+      for (let i = 0; i < user.following.length; i++) {
+        let following = user.following[i].toJSON();
         following.profile = await Profile.findOne({
           user: following._id,
         }).select('pic');

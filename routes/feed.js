@@ -60,13 +60,13 @@ router.post('/upload', auth, async (req, res) => {
 router.get('/feed', auth, async (req, res) => {
   try {
     const current_user = await User.findById(req.user.id);
-    var posts = await Post.find({
+    let posts = await Post.find({
       user: { $in: current_user.following },
     }).populate('user', 'username');
 
-    var postsData = [];
-    for (var i = 0; i < posts.length; i++) {
-      var postData = posts[i].toJSON();
+    let postsData = [];
+    for (let i = 0; i < posts.length; i++) {
+      let postData = posts[i].toJSON();
       if (posts[i].likes.includes(req.user.id)) {
         postData.isLiked = true;
       } else {
@@ -212,7 +212,7 @@ router.delete('/comment/:comment_id', auth, async (req, res) => {
 // view a post
 router.get('/post/:id', auth, async (req, res) => {
   try {
-    var post = await Post.findById(req.params.id).populate('user', [
+    let post = await Post.findById(req.params.id).populate('user', [
       'username',
     ]);
     if (!post) {
@@ -220,16 +220,16 @@ router.get('/post/:id', auth, async (req, res) => {
       return res.status(404).json(response);
     }
 
-    var postData = post.toJSON();
+    let postData = post.toJSON();
     // include user profile data
     const profile = await Profile.findOne({ user: post.user }).select('pic');
 
-    var comments_list = [];
+    let comments_list = [];
     const comments = await Comment.find({ post: post._id }).populate('user', [
       'username',
     ]);
-    for (var i = 0; i < comments.length; i++) {
-      var commentsData = comments[i].toJSON();
+    for (let i = 0; i < comments.length; i++) {
+      let commentsData = comments[i].toJSON();
       const commentor_profile = await Profile.findOne({
         user: comments[i].user._id,
       }).select('pic');
@@ -258,18 +258,18 @@ router.get('/post/:id', auth, async (req, res) => {
 // get all comments of a post
 router.get('/post/:id/comments', auth, async (req, res) => {
   try {
-    var post = await Post.findById(req.params.id);
+    let post = await Post.findById(req.params.id);
     if (!post) {
       const response = get_response_dict(404, 'Post not found', {});
       return res.status(404).json(response);
     }
 
-    var comments_list = [];
+    let comments_list = [];
     const comments = await Comment.find({ post: post._id }).populate('user', [
       'username',
     ]);
-    for (var i = 0; i < comments.length; i++) {
-      var commentsData = comments[i].toJSON();
+    for (let i = 0; i < comments.length; i++) {
+      let commentsData = comments[i].toJSON();
       const commentor_profile = await Profile.findOne({
         user: comments[i].user._id,
       }).select('pic');

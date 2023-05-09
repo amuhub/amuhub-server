@@ -60,13 +60,13 @@ router.get('/:id', auth, async (req, res) => {
       return res.status(401).json(response);
     }
     // get all answers for this question
-    var answer_list = [];
+    let answer_list = [];
     const answers = await Answer.find({ ques: req.params.id }).populate(
       'user',
       'username name'
     );
-    for (var i = 0; i < answers.length; i++) {
-      var answer = answers[i].toJSON();
+    for (let i = 0; i < answers.length; i++) {
+      let answer = answers[i].toJSON();
       answer.user.profile = await Profile.findOne({
         user: answer.user._id,
       }).select('pic');
@@ -79,7 +79,7 @@ router.get('/:id', auth, async (req, res) => {
     );
 
     // convert question to json
-    var questionData = question.toJSON();
+    let questionData = question.toJSON();
     questionData.answers = answer_list;
     questionData.profile = profile;
 
@@ -112,10 +112,10 @@ router.get('/', auth, async (req, res) => {
     }
 
     // get profile for user for each question
-    var questionsList = [];
-    for (var i = 0; i < questions.length; i++) {
+    let questionsList = [];
+    for (let i = 0; i < questions.length; i++) {
       const profile = await Profile.findOne({ user: questions[i].user });
-      var questionData = questions[i].toJSON();
+      let questionData = questions[i].toJSON();
       questionData.profile = profile;
       questionsList.push(questionData);
     }
@@ -148,12 +148,12 @@ router.get('/interests/tags/', auth, async (req, res) => {
     }
 
     // get profile for user for each question
-    var questionsList = [];
-    for (var i = 0; i < questions.length; i++) {
+    let questionsList = [];
+    for (let i = 0; i < questions.length; i++) {
       const profile = await Profile.findOne({
         user: questions[i].user._id,
       }).select('pic');
-      var questionData = questions[i].toJSON();
+      let questionData = questions[i].toJSON();
       questionData.user.profile = profile;
       questionData.answer_count = await Answer.countDocuments({
         ques: questionData._id,

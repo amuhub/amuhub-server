@@ -27,7 +27,7 @@ const toggleFollowUser = async (req, res, session) => {
     await current_user.save();
 
     // showing updated user
-    var otherUserData = other_user.toJSON();
+    let otherUserData = other_user.toJSON();
     otherUserData.isFollowing = false;
     const response = get_response_dict(200, 'User unfollowed', otherUserData);
     return res.status(201).json(response);
@@ -41,7 +41,7 @@ const toggleFollowUser = async (req, res, session) => {
   await current_user.save();
 
   // showing updated user
-  var otherUserData = other_user.toJSON();
+  let otherUserData = other_user.toJSON();
   otherUserData.isFollowing = true;
 
   // create notification
