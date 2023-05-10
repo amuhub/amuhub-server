@@ -201,7 +201,7 @@ router.delete('/comment/:comment_id', auth, async (req, res) => {
     // delete comment
     await comment.remove();
 
-    const response = get_response_dict(200, 'Comment deleted', post);
+    const response = get_response_dict(200, 'Comment deleted', {});
     return res.status(200).json(response);
   } catch (err) {
     console.error(err.message);
