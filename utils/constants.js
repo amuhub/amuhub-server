@@ -14,6 +14,8 @@ const NotificationTypeActionMapping = {
   },
   profile: {
     follow: 'started following',
+    like: 'liked',
+    comment: 'commented on',
   },
 };
 

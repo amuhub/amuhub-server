@@ -110,7 +110,10 @@ router.delete('/delete/:id', auth, async (req, res) => {
 // like post
 router.post('/togglelike/:id', auth, async (req, res) => {
   try {
-    const post = await Post.findById(req.params.id);
+    const post = await Post.findById(req.params.id).populate(
+      'user',
+      'username'
+    );
     if (!post) {
       const response = get_response_dict(404, 'Post not found', {});
       return res.status(404).json(response);
@@ -131,13 +134,13 @@ router.post('/togglelike/:id', auth, async (req, res) => {
 
       const response = get_response_dict(200, 'Post liked', post);
       // create notification
-      if (post.user.toString() !== req.user.id) {
+      if (post.user._id.toString() !== req.user.id) {
         createNotification({
-          receiver: post.user,
+          receiver: post.user._id,
           sender: req.user.id,
-          type: NotificationTypes.post,
+          type: NotificationTypes.profile,
           action: NotificationTypeActionMapping.post.like,
-          item_id: post._id,
+          item_id: `${post.user.username}/posts/?open=${post._id}`,
         });
       }
       return res.status(200).json(response);
@@ -151,7 +154,10 @@ router.post('/togglelike/:id', auth, async (req, res) => {
 // comment on post
 router.post('/comment/:id', auth, async (req, res) => {
   try {
-    const post = await Post.findById(req.params.id);
+    const post = await Post.findById(req.params.id).populate(
+      'user',
+      'username'
+    );
     if (!post) {
       const response = get_response_dict(404, 'Post not found', {});
       return res.status(404).json(response);
@@ -166,13 +172,13 @@ router.post('/comment/:id', auth, async (req, res) => {
     await comment.save();
 
     // create notification
-    if (post.user.toString() !== req.user.id) {
+    if (post.user._id.toString() !== req.user.id) {
       createNotification({
-        receiver: post.user,
+        receiver: post.user._id,
         sender: req.user.id,
-        type: NotificationTypes.post,
+        type: NotificationTypes.profile,
         action: NotificationTypeActionMapping.post.comment,
-        item_id: post._id,
+        item_id: `${post.user.username}/posts/?open=${post._id}`,
       });
     }
     const response = get_response_dict(200, 'Comment added', comment);
@@ -224,20 +230,7 @@ router.get('/post/:id', auth, async (req, res) => {
     // include user profile data
     const profile = await Profile.findOne({ user: post.user }).select('pic');
 
-    let comments_list = [];
-    const comments = await Comment.find({ post: post._id }).populate('user', [
-      'username',
-    ]);
-    for (let i = 0; i < comments.length; i++) {
-      let commentsData = comments[i].toJSON();
-      const commentor_profile = await Profile.findOne({
-        user: comments[i].user._id,
-      }).select('pic');
-      commentsData.user.profile = commentor_profile;
-      comments_list.push(commentsData);
-    }
     postData.user.profile = profile;
-    postData.comments = comments_list;
 
     // check if post has already been liked
     if (post.likes.includes(req.user.id)) {
@@ -253,7 +246,6 @@ router.get('/post/:id', auth, async (req, res) => {
     res.status(500).send('Server Error');
   }
 });
-
 
 // get all comments of a post
 router.get('/post/:id/comments', auth, async (req, res) => {
@@ -284,8 +276,5 @@ router.get('/post/:id/comments', auth, async (req, res) => {
     res.status(500).send('Server Error');
   }
 });
-
-
-
 
 module.exports = router;

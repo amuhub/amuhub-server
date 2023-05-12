@@ -32,6 +32,15 @@ const getNotificationData = async (notification) => {
     'pic'
   );
 
+  let type = notification.type;
+  // if type is profile and action is (liked or commented on), then change type to post
+  if (
+    notification.type === 'profile' &&
+    ['liked', 'commented on'].includes(notification.action)
+  ) {
+    type = 'post';
+  }
+
   return {
     id: notification._id,
     receiver: notification.receiver,
@@ -39,7 +48,7 @@ const getNotificationData = async (notification) => {
     type: notification.type,
     action: notification.action,
     redirectUrl: `${notification.type}/${notification.item_id}`,
-    message: `${sender.username} ${notification.action} your ${notification.type}`,
+    message: `${sender.username} ${notification.action} your ${type}`,
     isViewed: notification.isViewed,
     isViewedAt: notification.isViewedAt,
     createdAt: notification.createdAt,

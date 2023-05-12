@@ -276,7 +276,7 @@ router.get('/:username/social/', auth, async (req, res) => {
       return res.status(401).json(response);
     }
     if (social === 'followers') {
-      let follower_list = [];
+      var follower_list = [];
       for (let i = 0; i < user.follower.length; i++) {
         let follower = user.follower[i].toJSON();
         follower.profile = await Profile.findOne({ user: follower._id }).select(
@@ -285,7 +285,7 @@ router.get('/:username/social/', auth, async (req, res) => {
         follower_list.push(follower);
       }
     } else if (social === 'following') {
-      let following_list = [];
+      var following_list = [];
       for (let i = 0; i < user.following.length; i++) {
         let following = user.following[i].toJSON();
         following.profile = await Profile.findOne({

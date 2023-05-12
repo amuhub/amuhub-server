@@ -51,7 +51,7 @@ const toggleFollowUser = async (req, res, session) => {
       sender: req.user.id,
       type: NotificationTypes.profile,
       action: NotificationTypeActionMapping.profile.follow,
-      item_id: other_user.username,
+      item_id: current_user.username,
     });
   }
   const response = get_response_dict(200, 'User followed', otherUserData);
