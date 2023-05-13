@@ -25,7 +25,7 @@ const upvoteAnswer = async (req, res, session) => {
     answer.upvotes.pull(req.user.id);
     await answer.save({ session });
     const response = get_response_dict(200, 'Upvote Removed', null);
-    return res.status(401).json(response);
+    return res.status(201).json(response);
   }
 
   // if previously downvoted, remove downvote
@@ -69,7 +69,7 @@ const downvoteAnswer = async (req, res, session) => {
     answer.downvotes.pull(req.user.id);
     await answer.save({ session });
     const response = get_response_dict(200, 'Downvote Removed', null);
-    return res.status(401).json(response);
+    return res.status(201).json(response);
   }
 
   // if previously upvoted, remove upvote
