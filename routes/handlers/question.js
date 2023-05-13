@@ -24,7 +24,7 @@ const upvoteQuestion = async (req, res, session) => {
   if (question.upvotes.includes(req.user.id)) {
     question.upvotes.pull(req.user.id);
     await question.save({ session });
-    const response = get_response_dict(401, 'Upvote Removed', null);
+    const response = get_response_dict(200, 'Upvote Removed', null);
     return res.status(401).json(response);
   }
 
@@ -68,7 +68,7 @@ const downvoteQuestion = async (req, res, session) => {
   if (question.downvotes.includes(req.user.id)) {
     question.downvotes.pull(req.user.id);
     await question.save({ session });
-    const response = get_response_dict(401, 'Downvote Removed', null);
+    const response = get_response_dict(200, 'Downvote Removed', null);
     return res.status(401).json(response);
   }
 
