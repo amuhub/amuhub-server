@@ -25,7 +25,7 @@ const upvoteQuestion = async (req, res, session) => {
     question.upvotes.pull(req.user.id);
     await question.save({ session });
     const response = get_response_dict(200, 'Upvote Removed', null);
-    return res.status(401).json(response);
+    return res.status(201).json(response);
   }
 
   // if previously downvoted by user
