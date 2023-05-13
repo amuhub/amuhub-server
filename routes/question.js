@@ -161,6 +161,8 @@ router.get('/interests/tags/', auth, async (req, res) => {
         user: questions[i].user._id,
       }).select('pic');
       let questionData = questions[i].toJSON();
+      questionData.upvoted = questions[i].upvotes.includes(req.user.id);
+      questionData.downvoted = questions[i].downvotes.includes(req.user.id);
       questionData.user.profile = profile;
       questionData.answer_count = await Answer.countDocuments({
         ques: questionData._id,
