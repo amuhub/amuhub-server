@@ -67,6 +67,8 @@ router.get('/:id', auth, async (req, res) => {
     );
     for (let i = 0; i < answers.length; i++) {
       let answer = answers[i].toJSON();
+      answer.upvoted = answers[i].upvotes.includes(req.user.id);
+      answer.downvoted = answers[i].downvotes.includes(req.user.id);
       answer.user.profile = await Profile.findOne({
         user: answer.user._id,
       }).select('pic');
@@ -82,6 +84,9 @@ router.get('/:id', auth, async (req, res) => {
     let questionData = question.toJSON();
     questionData.answers = answer_list;
     questionData.user.profile = profile;
+
+    questionData.upvoted = question.upvotes.includes(req.user.id);
+    questionData.downvoted = question.downvotes.includes(req.user.id);
 
     const response = get_response_dict(200, 'Question found', questionData);
     return res.status(201).json(response);
@@ -116,6 +121,8 @@ router.get('/', auth, async (req, res) => {
     for (let i = 0; i < questions.length; i++) {
       const profile = await Profile.findOne({ user: questions[i].user });
       let questionData = questions[i].toJSON();
+      questionData.upvoted = question[i].upvotes.includes(req.user.id);
+      questionData.downvoted = question[i].downvotes.includes(req.user.id);
       questionData.profile = profile;
       questionsList.push(questionData);
     }

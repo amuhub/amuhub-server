@@ -110,7 +110,7 @@ router.get('/me', auth, async (req, res) => {
   }
 });
 
-router.get('/:username', authOptional, async (req, res) => {
+router.get('/:username', auth, async (req, res) => {
   try {
     // get user
     const searched_user = await User.findOne({ username: req.params.username });
@@ -132,12 +132,9 @@ router.get('/:username', authOptional, async (req, res) => {
     // get searched_user's followers and following
     profileData.follower = searched_user.follower;
     profileData.following = searched_user.following;
-    if (req.user) {
-      profileData.auth = true;
-      profileData.isFollowing = searched_user.follower.includes(req.user.id)
-        ? true
-        : false;
-    }
+    profileData.isFollowing = searched_user.follower.includes(req.user.id)
+      ? true
+      : false;
 
     const response = get_response_dict(200, 'Profile found', profileData);
     return res.status(200).json(response);
@@ -147,7 +144,7 @@ router.get('/:username', authOptional, async (req, res) => {
   }
 });
 
-router.get('/:username/answers', async (req, res) => {
+router.get('/:username/answers', auth, async (req, res) => {
   try {
     // get user
     const searched_user = await User.findOne({ username: req.params.username });
@@ -182,7 +179,7 @@ router.get('/:username/answers', async (req, res) => {
   }
 });
 
-router.get('/:username/questions', async (req, res) => {
+router.get('/:username/questions', auth,  async (req, res) => {
   try {
     // get user
     const searched_user = await User.findOne({ username: req.params.username });
@@ -198,6 +195,8 @@ router.get('/:username/questions', async (req, res) => {
     const questions = await getQuestionforUser(searched_user.id);
     for (let i = 0; i < questions.length; i++) {
       let question = questions[i].toJSON();
+      question.upvoted = questions[i].upvotes.includes(req.user.id);
+      question.downvoted = questions[i].downvotes.includes(req.user.id);
       question.answer_count = await Answer.countDocuments({
         ques: question._id,
       });
@@ -211,7 +210,7 @@ router.get('/:username/questions', async (req, res) => {
   }
 });
 
-router.get('/:username/posts', async (req, res) => {
+router.get('/:username/posts', auth, async (req, res) => {
   try {
     // get user
     const searched_user = await User.findOne({ username: req.params.username });
@@ -236,7 +235,7 @@ router.get('/:username/posts', async (req, res) => {
 router.get('/follow/:username', auth, withTransaction(toggleFollowUser));
 
 // search username and name
-router.get('/', async (req, res) => {
+router.get('/', auth, async (req, res) => {
   try {
     const search = req.query.search;
     let users = await User.find({
