@@ -54,7 +54,7 @@ router.post('/', auth, async (req, res) => {
 // get a question
 router.get('/:id', auth, async (req, res) => {
   try {
-    const question = await Question.findById(req.params.id).populate('tag');
+    const question = await Question.findById(req.params.id).populate('tag').populate('user', 'username name');
     if (!question) {
       const response = get_response_dict(401, 'Question not found', null);
       return res.status(401).json(response);
@@ -81,7 +81,7 @@ router.get('/:id', auth, async (req, res) => {
     // convert question to json
     let questionData = question.toJSON();
     questionData.answers = answer_list;
-    questionData.profile = profile;
+    questionData.user.profile = profile;
 
     const response = get_response_dict(200, 'Question found', questionData);
     return res.status(201).json(response);
