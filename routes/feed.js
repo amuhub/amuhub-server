@@ -62,7 +62,9 @@ router.get('/feed', auth, async (req, res) => {
     const current_user = await User.findById(req.user.id);
     let posts = await Post.find({
       user: { $in: current_user.following },
-    }).populate('user', 'username');
+    })
+      .populate('user', 'username')
+      .sort({ createdAt: -1 });
 
     let postsData = [];
     for (let i = 0; i < posts.length; i++) {

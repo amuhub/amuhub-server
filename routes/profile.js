@@ -179,7 +179,7 @@ router.get('/:username/answers', auth, async (req, res) => {
   }
 });
 
-router.get('/:username/questions', auth,  async (req, res) => {
+router.get('/:username/questions', auth, async (req, res) => {
   try {
     // get user
     const searched_user = await User.findOne({ username: req.params.username });

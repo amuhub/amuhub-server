@@ -24,7 +24,7 @@ const upvoteQuestion = async (req, res, session) => {
   if (question.upvotes.includes(req.user.id)) {
     question.upvotes.pull(req.user.id);
     await question.save({ session });
-    const response = get_response_dict(200, 'Upvote Removed',question);
+    const response = get_response_dict(200, 'Upvote Removed', question);
     return res.status(201).json(response);
   }
 

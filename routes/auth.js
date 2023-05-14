@@ -12,9 +12,11 @@ router.post('/login', async (req, res) => {
   // validate login
   const result = validateLogin(req.body);
   if (result.error) {
-    const response = get_response_dict(401, 'Validation error', {
-      error: result.error.details[0].message,
-    });
+    const response = get_response_dict(
+      401,
+      result.error.details[0].message,
+      null
+    );
     return res.status(400).json(response);
   }
   // check if user exist
@@ -46,9 +48,11 @@ router.post('/login', async (req, res) => {
 router.post('/register', async (req, res) => {
   const result = validateUser(req.body);
   if (result.error) {
-    const response = get_response_dict(401, 'Validation error', {
-      error: result.error.details[0].message,
-    });
+    const response = get_response_dict(
+      401,
+      result.error.details[0].message,
+      null
+    );
     return res.status(400).json(response);
   }
   try {

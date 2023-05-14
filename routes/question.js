@@ -54,7 +54,9 @@ router.post('/', auth, async (req, res) => {
 // get a question
 router.get('/:id', auth, async (req, res) => {
   try {
-    const question = await Question.findById(req.params.id).populate('tag').populate('user', 'username name');
+    const question = await Question.findById(req.params.id)
+      .populate('tag')
+      .populate('user', 'username name');
     if (!question) {
       const response = get_response_dict(401, 'Question not found', null);
       return res.status(401).json(response);
