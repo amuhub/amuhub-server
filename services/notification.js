@@ -79,7 +79,6 @@ const deleteAllOldNotifications = async () => {
       { isViewedAt: { $lt: oneHourAgo } },
     ],
   });
-  console.log('Old notifications deleted');
 };
 
 // delete all notifications with created at older than a month
@@ -89,7 +88,6 @@ const deleteAllUnviewedNotifications = async () => {
     currentTime.getTime() - 30 * 24 * 60 * 60 * 1000
   );
   await Notification.deleteMany({ createdAt: { $lt: oneMonthAgo } });
-  console.log('Unviewed notifications deleted');
 };
 
 const viewNotification = async (notificationId, userId) => {

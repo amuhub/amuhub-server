@@ -39,7 +39,6 @@ cron.schedule('0 * * * *', () => {
   // for every munite '* * * * *'
   deleteAllOldNotifications();
   deleteAllUnviewedNotifications();
-  console.log('Running cron job');
 });
 
 const port = process.env.PORT || 8000;
