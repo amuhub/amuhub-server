@@ -11,6 +11,7 @@ const routerNotif = require('./routes/notification');
 const cors = require('cors');
 const fileUpload = require('express-fileupload');
 const cron = require('node-cron');
+const cronSelf = require('./utils/cronSelf');
 const {
   deleteAllOldNotifications,
   deleteAllUnviewedNotifications,
@@ -40,6 +41,12 @@ cron.schedule('0 * * * *', () => {
   deleteAllOldNotifications();
   deleteAllUnviewedNotifications();
 });
+
+// every 5 minutes
+cron.schedule('*/5 * * * *', () => {
+  cronSelf();
+});
+
 
 const port = process.env.PORT || 8000;
 

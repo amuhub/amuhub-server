@@ -61,7 +61,6 @@ const getNotificationforUser = async (userId) => {
     const notifications = await Notification.find({ receiver: userId }).sort({
       createdAt: -1,
     });
-    console.log('Notifications fetched');
     return notifications;
   } catch (err) {
     console.error(err.message);
