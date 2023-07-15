@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: amuhub-app
+spec:
+  containers:
+  - name: amuhub-app
+    image: farazkhanfk7/amuhub:v2
+    ports:
+    - containerPort: 8000

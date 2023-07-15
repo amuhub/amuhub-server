@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: amuhub-app
+  labels:
+    app: amuhub
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: amuhub
+  template:
+    metadata:
+      labels:
+        app: amuhub
+    spec:
+      containers:
+      - name: amuhub-app
+        image: farazkhanfk7/amuhub:v2
+        ports:
+        - containerPort: 8000
